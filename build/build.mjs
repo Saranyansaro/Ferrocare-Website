@@ -12,7 +12,8 @@ import {
 } from "./data.mjs";
 import {
   page, header, footer, logo, icons, artFor, art, productCard, ctaBand,
-  pageHead, sectionHead, ratingPill, setNavProducts, shot, figure, gallery, asset,
+  pageHead, sectionHead, ratingPill, setNavProducts, shot, figure, gallery, asset, timeline,
+  selector, isoGauge, ticker,
 } from "./render.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -23,8 +24,90 @@ const MODEL_COUNT = families.reduce((a, f) => a + f.models.length, 0);
 
 /* Canonical origin for social scrapers and search engines. Override with
    SITE_ORIGIN when deploying somewhere else:  SITE_ORIGIN=https://x node build/build.mjs */
+const FORM = company.form;
 const SITE_ORIGIN = (process.env.SITE_ORIGIN || "https://saranyansaro.github.io/Ferrocare-Website").replace(/\/$/, "");
 const canon = (file) => `${SITE_ORIGIN}/${file}`;
+
+/* --------------------------------------------------------------------------
+   "Find your machine" — two questions, mapped to the families that answer them.
+   Keys are `${fluid}|${problem}`; the lookup is serialised into the page and
+   resolved in the browser.
+   -------------------------------------------------------------------------- */
+const SELECTOR_FLUIDS = [
+  { key: "hydraulic", label: "Hydraulic oil" },
+  { key: "gear",      label: "Gear oil" },
+  { key: "turbine",   label: "Turbine / lube oil" },
+  { key: "glycol",    label: "Water-glycol (HFC)" },
+  { key: "frf",       label: "Phosphate ester / FRF" },
+  { key: "coolant",   label: "Grinding coolant" },
+];
+const SELECTOR_PROBLEMS = [
+  { key: "particles", label: "Fine particles / wear metal" },
+  { key: "water",     label: "Water or moisture" },
+  { key: "varnish",   label: "Sludge & varnish" },
+  { key: "bulk",      label: "Heavy solid contamination" },
+  { key: "unknown",   label: "Not sure — needs measuring" },
+];
+
+const FAM = Object.fromEntries(families.map((f) => [f.slug, f]));
+const match = (slug, why, tags) => ({
+  slug, why, tags,
+  name: FAM[slug].short,
+  img: FAM[slug].img ? `${FAM[slug].img.replace(/\.[a-z]+$/i, "")}.webp` : "",
+  href: `product-${slug}.html`,
+});
+
+function selectorLookup() {
+  const g = {
+    hydraulic: {
+      particles: [match("electrostatic-liquid-cleaners", "Sub-micron collection without disturbing the additive package — the standard answer for hydraulic systems running servo valves.", ["1 µ & below", "ELC series"])],
+      water:     [match("low-vacuum-dehydration", "Free and emulsified water removed under vacuum to 10–20 ppm, with no thermal stress on the oil.", ["10–20 ppm", "LVDH series"])],
+      varnish:   [match("electrostatic-liquid-cleaners", "Varnish and sludge are collected on the dielectric media — mechanical filters pass them straight through.", ["Varnish removal", "ELC series"])],
+      bulk:      [match("mechanical-filtration", "Magnetic pre-strainer plus a two- or three-stage cartridge train for heavy solid loading.", ["2 & 3 stage", "1–40 µm"]), match("hydraulic-oil-filtration-machines", "Trolley and portable offline units that restore cleanliness codes without draining the system.", ["75 LPM", "Trolley mounted"])],
+      unknown:   [match("condition-monitoring", "Measure first. Particle counts and moisture readings decide whether the oil is cleaned, reclaimed or replaced.", ["ISO 4406", "OPCOM"])],
+    },
+    gear: {
+      particles: [match("gearbox-oil-filtration", "Couples directly to the gearbox housing and works the oil continuously — no dismantling required.", ["Direct coupling", "MS6 DHU"]), match("mechanical-filtration", "Multi-stage train with a magnetic stage that pins ferrous wear debris with no consumable.", ["Magnetic stage"])],
+      water:     [match("low-vacuum-dehydration", "Handles up to 320 cSt and 20,000 ppm water — the heavy-viscosity specification is built for gear oils.", ["320 cSt", "20,000 ppm"])],
+      varnish:   [match("gearbox-oil-filtration", "Lifts carbonaceous sludge out of the sump rather than leaving it to recirculate through the bearings.", ["Carbon removal", "3,000 LPH"])],
+      bulk:      [match("oil-filtration-plants", "Gear oil filtration units at 6,000 LPH with 1, 3, 5, 10, 25 and 40 µm element options.", ["6,000 LPH", "5 µm"])],
+      unknown:   [match("condition-monitoring", "A magnetic element inspection and a particle count tell you more in ten minutes than a year of guesswork.", ["Particle count"])],
+    },
+    turbine: {
+      particles: [match("electrostatic-liquid-cleaners", "Keeps turbine lube oil in the superclean state the bearings need, at 30,000 litres per ELC 100 LP.", ["30,000 L", "ELC 100 LP"])],
+      water:     [match("low-vacuum-dehydration", "Degassification models remove entrained gas as well as moisture — specified for turbine lube and EH control oil.", ["Degassification", "1–5 mbar"])],
+      varnish:   [match("electrostatic-liquid-cleaners", "Varnish on valve spools is exactly what electrostatic collection was developed to remove.", ["Varnish removal"])],
+      bulk:      [match("oil-filtration-plants", "Lube oil filtration equipment with 3 µm polishing for circulating systems.", ["3 µm polish", "250 LPH"])],
+      unknown:   [match("condition-monitoring", "Inline moisture sensing wired to auto-start dehydration, plus online particle counting to 400 bar.", ["400 bar", "Auto-start"])],
+    },
+    glycol: {
+      particles: [match("mechanical-filtration", "The water-glycol machine runs two-stage at 75 LPM and 16 bar — built for HFC fluid that standard filtration cannot handle.", ["75 LPM", "16 bar"])],
+      water:     [match("mechanical-filtration", "Water-glycol fluid is mostly water by design; the unit is specified for its chemistry rather than for drying it.", ["HFC fluid", "Two stage"])],
+      varnish:   [match("mechanical-filtration", "Two-stage filtration holds the fluid clean and keeps tramp contamination out of the circuit.", ["Two stage"])],
+      bulk:      [match("mechanical-filtration", "Two-stage train with a magnetic stage ahead of the cartridge elements.", ["Magnetic pre-strainer"])],
+      unknown:   [match("condition-monitoring", "Glycol fluids need their own test regime — talk to us before specifying filtration.", ["Advisory"])],
+    },
+    frf: {
+      particles: [match("oil-filtration-plants", "EPT Canada acid-control chemistry built in India: acid number held below 0.2 mg KOH/g and resistivity restored.", ["Acid < 0.2", "EPT Canada"])],
+      water:     [match("oil-filtration-plants", "Moisture held below 300–500 ppm in phosphate-ester and EHC fluids, with oxygen and combustible gases removed.", ["< 500 ppm", "EHC"])],
+      varnish:   [match("oil-filtration-plants", "Acid control is what prevents the varnish and servo-valve malfunction that plague FRF circuits.", ["Servo protection"])],
+      bulk:      [match("hydraulic-oil-filtration-machines", "Multistage filtration units specified for fire-resistant fluid circuits in steel and power plants.", ["FRF multistage", "800 LPH"])],
+      unknown:   [match("oil-filtration-plants", "FRF needs acid number and resistivity testing, not just a particle count. We will tell you which.", ["Acid number"])],
+    },
+    coolant: {
+      particles: [match("coolant-filtration-systems", "400 LPM central filtration that keeps abrasive and carbide fines out of the cutting zone.", ["400 LPM", "Grinding & honing"])],
+      water:     [match("coolant-filtration-systems", "Tramp oil and swarf separation for grinding cells, sized to the cell's coolant demand.", ["Tramp oil"])],
+      varnish:   [match("coolant-filtration-systems", "Tramp oil and fines removal is what stops coolant turning rancid and leaving deposits.", ["Tramp oil"])],
+      bulk:      [match("coolant-filtration-systems", "Magnetix rare-earth separation discharges a dry cake and uses no filter consumables at all.", ["Magnetix", "8× ferrite"])],
+      unknown:   [match("condition-monitoring", "Coolant condition is best judged by fines content and tramp oil — both are quick to measure.", ["Assessment"])],
+    },
+  };
+  // Any pair we have not explicitly mapped falls back to a measurement first.
+  for (const f of SELECTOR_FLUIDS)
+    for (const p of SELECTOR_PROBLEMS)
+      if (!g[f.key][p.key]) g[f.key][p.key] = g[f.key].unknown;
+  return g;
+}
 const GROUP_LABEL = {
   oil: "Oil purification",
   filtration: "Mechanical filtration",
@@ -169,6 +252,41 @@ const home = () => {
         <a class="btn btn--primary btn--lg" href="industries.html">Where they run ${icons.arrow}</a>
         <a class="btn btn--outline-light btn--lg" href="about.html">About Ferrocare</a>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ what clean oil actually means ============ -->
+<section class="section section--paper">
+  <div class="wrap split">
+    <div data-reveal>
+      <span class="eyebrow">Cleanliness, measured</span>
+      <h2 class="mt-4">What "clean" actually means in numbers</h2>
+      <p class="lead mt-5">
+        Oil cleanliness is reported as an ISO 4406 code — three numbers counting
+        particles above 4, 6 and 14 microns per millilitre. Lower is cleaner. A
+        hydraulic system running servo valves wants to be in the mid-teens; untreated
+        oil sits in the low twenties.
+      </p>
+      <p class="lead mt-5">
+        Mechanical filtration gets you part of the way. Electrostatic collection,
+        which reaches below one micron and also lifts sludge and varnish, is what
+        closes the gap to a code the valves can live with. Watch the needle.
+      </p>
+      <ul class="checks mt-6">
+        ${[
+          "ISO 4406 reported directly by OPCOM counters — no lab turnaround",
+          "Electrostatic collection to 1 micron and below",
+          "Sludge and varnish removed, which a particle count cannot see",
+          "Cleanliness codes logged over time to show the trend, not a snapshot",
+        ].map((t) => `<li>${icons.check}<span>${t}</span></li>`).join("")}
+      </ul>
+      <div class="btn-row mt-7">
+        <a class="btn btn--primary" href="product-condition-monitoring.html">Condition monitoring range ${icons.arrow}</a>
+      </div>
+    </div>
+    <div data-reveal data-delay="2">
+      ${isoGauge()}
     </div>
   </div>
 </section>
@@ -421,7 +539,24 @@ ${pageHead({
   </div>
 </section>
 
-<section class="section section--paper">
+<!-- ============ find your machine ============ -->
+<section class="section section--paper" id="find">
+  <div class="wrap wrap--narrow">
+    ${sectionHead({
+      eyebrow: "Sizing tool",
+      title: "Find your machine in two questions",
+      lead: "Pick the fluid you run and the contamination you are seeing. This is the short version of how a Ferrocare engineer narrows the range — the real sizing happens against your duty point.",
+      center: true,
+    })}
+    <div class="mt-8" data-reveal>
+      ${selector(SELECTOR_FLUIDS, SELECTOR_PROBLEMS, selectorLookup())}
+    </div>
+  </div>
+</section>
+
+${ticker(families.flatMap((f) => f.models.map((m) => m.name.split(" — ")[0])))}
+
+<section class="section">
   <div class="wrap">
     ${sectionHead({
       eyebrow: "By discipline",
@@ -473,6 +608,8 @@ const productDetail = (f, idx) => {
   const next = families[(idx + 1) % families.length];
 
   const body = `
+<div class="readbar" aria-hidden="true"><div class="readbar__fill" id="readFill"></div></div>
+
 ${pageHead({
   eyebrow: `${f.series} · ${GROUP_LABEL[f.group]}`,
   title: f.name,
@@ -480,7 +617,19 @@ ${pageHead({
   crumbs: [{ label: "Products", href: "products.html" }, { label: f.short }],
 })}
 
-<section class="section">
+<nav class="subnav" aria-label="On this page">
+  <div class="wrap subnav__row">
+    <span class="subnav__label">${f.series}</span>
+    <a class="subnav__link" href="#overview">Overview</a>
+    ${f.gallery ? `<a class="subnav__link" href="#gallery">Gallery</a>` : ""}
+    <a class="subnav__link" href="#technology">Technology</a>
+    <a class="subnav__link" href="#models">Models &amp; specifications</a>
+    <a class="subnav__link" href="#applications">Applications</a>
+    <a class="btn btn--primary btn--sm subnav__cta" href="contact.html?product=${encodeURIComponent(f.name)}">Enquire ${icons.arrow}</a>
+  </div>
+</nav>
+
+<section class="section" id="overview">
   <div class="wrap split">
     <div data-reveal>
       <span class="eyebrow">At a glance</span>
@@ -518,7 +667,7 @@ ${f.gallery ? `
   </div>
 </section>` : ""}
 
-<section class="section section--paper">
+<section class="section section--paper" id="technology">
   <div class="wrap">
     ${sectionHead({ eyebrow: "Technology", title: "How it works" })}
     <div class="split mt-8">
@@ -544,7 +693,7 @@ ${f.gallery ? `
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="models">
   <div class="wrap">
     ${sectionHead({
       eyebrow: "Models & specifications",
@@ -607,7 +756,7 @@ ${f.gallery ? `
   </div>
 </section>
 
-<section class="section section--dark">
+<section class="section section--dark" id="applications">
   <div class="wrap">
     ${sectionHead({ eyebrow: "Where it is used", title: "Applications and industries" })}
     <div class="grid grid--3 mt-8">
@@ -662,60 +811,121 @@ ${pageHead({
   crumbs: [{ label: "Company" }],
 })}
 
+<!-- ================= who we are, told with photographs ================= -->
 <section class="section">
-  <div class="wrap split">
-    <div data-reveal>
-      <span class="eyebrow">Who we are</span>
-      <h2 class="mt-4">An engineering company that happens to sell machines</h2>
-      <p class="lead mt-5">
-        Ferrocare was set up in Pune in 1980 to solve a specific industrial problem:
-        hydraulic and lubricating oil that degrades long before it needs to. The answer
-        the company settled on — electrostatic collection — is still the technology at
-        the centre of the product range, and still the reason customers come back.
-      </p>
-      <p class="lead mt-5">
-        Over four decades the range widened to cover the rest of the problem. Water
-        needed vacuum dehydration. Bulk solids needed mechanical filtration. Grinding
-        cells needed coolant systems. And proving any of it worked needed instruments.
-        Today the company builds across all of those disciplines, which means a
-        recommendation is made against your oil rather than against a product list.
-      </p>
-      <p class="lead mt-5">
-        Led by <strong>Mr. Ravikiran C.</strong>, the business remains a manufacturer in
-        the full sense — design, fabrication, assembly and testing under one roof in
-        Kondhwa Budruk, Pune.
-      </p>
-    </div>
-    <div class="split__media" data-reveal data-delay="2">
-      ${art.elc}
+  <div class="wrap">
+    <div class="about-intro">
+      <div class="about-intro__text" data-reveal>
+        <span class="eyebrow">Who we are</span>
+        <h2 class="mt-4">An engineering company that happens to sell machines</h2>
+        <p class="lead mt-5">
+          Ferrocare was set up in Pune in 1980 to solve a specific industrial problem:
+          hydraulic and lubricating oil that degrades long before it needs to be. The
+          answer the company settled on — electrostatic collection — is still the
+          technology at the centre of the range, and still the reason customers return.
+        </p>
+        <p class="lead mt-5">
+          Over four decades the range widened to cover the rest of that problem. Water
+          needed vacuum dehydration. Bulk solids needed mechanical filtration. Grinding
+          cells needed coolant systems. And proving any of it worked needed instruments.
+          Today the company builds across all of those disciplines, so a recommendation
+          is made against your oil rather than against a product list.
+        </p>
+        <p class="lead mt-5">
+          Led by <strong>Mr. Ravikiran C.</strong>, the business remains a manufacturer in
+          the full sense — design, fabrication, assembly and testing under one roof in
+          Kondhwa Budruk, Pune.
+        </p>
+      </div>
+      <div class="about-intro__media" data-reveal data-delay="2">
+        ${shot("elc-machine", "Ferrocare ELC electrostatic liquid cleaner")}
+        <div class="about-intro__stack">
+          ${shot("lvdh-machine", "Ferrocare LVDH low vacuum dehydration machine")}
+          ${shot("opcom-handheld", "OPCOM offline particle counter")}
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="section section--paper">
+<!-- ======================= the numbers ======================= -->
+<section class="section section--tight">
   <div class="wrap">
     <div class="stats" data-reveal>
       <div class="stat"><div class="stat__v" data-plain>${legal.founded}</div><div class="stat__l">Established in Pune</div></div>
+      <div class="stat"><div class="stat__v"><span data-count="1000">1000</span><sup>+</sup></div><div class="stat__l">ELC units in India</div></div>
+      <div class="stat"><div class="stat__v"><span data-count="25000">25000</span><sup>+</sup></div><div class="stat__l">Kleentek units worldwide</div></div>
       <div class="stat"><div class="stat__v" data-plain>${legal.employees.split(" ")[0]}</div><div class="stat__l">People</div></div>
-      <div class="stat"><div class="stat__v" data-plain>${legal.turnover}</div><div class="stat__l">Annual turnover</div></div>
       <div class="stat"><div class="stat__v" data-plain>${families.length}</div><div class="stat__l">Product families</div></div>
     </div>
   </div>
 </section>
 
-<section class="section">
+<!-- ==================== works band, full bleed ==================== -->
+<section class="band band--soft">
+  <div class="band__bg">
+    <img src="assets/img/install-5.jpg" alt="Ferrocare engineers commissioning an oil filtration unit on site" loading="lazy" decoding="async">
+  </div>
   <div class="wrap">
-    ${sectionHead({ eyebrow: "Milestones", title: "How the range grew", lead: "Each expansion came from a customer problem that the existing machines could not solve." })}
-    <div class="steps mt-8">
-      ${milestones.map((m) => `
-        <div class="step" data-reveal>
-          <div class="mono accent-text" style="padding-top:6px">${m.year}</div>
-          <div><h3>${m.title}</h3><p>${m.body}</p></div>
-        </div>`).join("")}
+    <div style="max-width:600px" data-reveal>
+      <span class="eyebrow">The works</span>
+      <h2 class="mt-4">Designed, built and tested in Kondhwa Budruk</h2>
+      <p class="lead mt-5">
+        A 6,000 sq ft manufacturing premises in south-east Pune. Fabrication, assembly,
+        wiring, panel building and performance testing all happen here — which is why
+        a duty point that falls outside the catalogue is a conversation rather than a
+        refusal.
+      </p>
+      <ul class="checks mt-6">
+        ${[
+          "Skid, trolley and stationary formats in MS or SS",
+          "EPT Canada acid-control chemistry for phosphate-ester fluids",
+          "IoT and MODBUS control on the R-series ELC range",
+          "Custom flow rate, viscosity and water-load sizing per application",
+          "Factory acceptance testing before dispatch",
+        ].map((t) => `<li>${icons.check}<span>${t}</span></li>`).join("")}
+      </ul>
+      <div class="btn-row mt-7">
+        <a class="btn btn--primary" href="contact.html">Arrange a visit ${icons.arrow}</a>
+        <a class="btn btn--outline-light" href="products.html">See the range</a>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ==================== animated milestone timeline ==================== -->
+<section class="section">
+  <div class="wrap">
+    ${sectionHead({
+      eyebrow: "Milestones",
+      title: "How the range grew",
+      lead: "Each expansion came from a customer problem the existing machines could not solve. Read it as a line, not a list — every stage still sells today.",
+      center: true,
+    })}
+    ${timeline(milestones)}
+  </div>
+</section>
+
+<!-- ==================== installations ==================== -->
+<section class="section section--paper">
+  <div class="wrap">
+    ${sectionHead({
+      eyebrow: "In the field",
+      title: "Machines at work",
+      lead: "Trolley units move between reservoirs. Skid units stay plumbed into the system they serve. Either way they run on the shop floor, not in a laboratory.",
+    })}
+    <div class="mt-8" data-reveal>
+      ${gallery([
+        { img: "install-8", caption: "ELC unit installed at a machine reservoir" },
+        { img: "install-3", caption: "Commissioning at a power plant lube system" },
+        { img: "install-7", caption: "Unit connected to a press hydraulic circuit" },
+        { img: "install-1", caption: "Close-coupled installation on a plant floor" },
+      ])}
+    </div>
+  </div>
+</section>
+
+<!-- ==================== principles ==================== -->
 <section class="section section--dark">
   <div class="wrap">
     ${sectionHead({ eyebrow: "Principles", title: "What we hold to" })}
@@ -730,7 +940,23 @@ ${pageHead({
   </div>
 </section>
 
+<!-- ==================== clients ==================== -->
 <section class="section">
+  <div class="wrap">
+    ${sectionHead({
+      eyebrow: "Customers",
+      title: "Supplied to plants across Indian industry",
+      lead: "Steel mills, power stations, automotive lines, plastics plants, OEMs and defence establishments. Client names are drawn from Ferrocare's own published listings, historical and current.",
+      center: true,
+    })}
+    <div class="client-grid mt-8" data-reveal>
+      ${clients.map((c) => `<span class="client">${c}</span>`).join("")}
+    </div>
+  </div>
+</section>
+
+<!-- ==================== registration ==================== -->
+<section class="section section--paper">
   <div class="wrap">
     ${sectionHead({ eyebrow: "Company record", title: "Registration & credentials", lead: "Ferrocare is a limited company registered in Maharashtra, India, and holds manufacturer-exporter status." })}
     <div class="grid grid--2 mt-8">
@@ -753,6 +979,7 @@ ${pageHead({
           <tbody>
             <tr><th>Established</th><td>${legal.founded}</td></tr>
             <tr><th>Employees</th><td>${legal.employees}</td></tr>
+            <tr><th>Premises</th><td>${legal.premises}</td></tr>
             <tr><th>Annual turnover</th><td>${legal.turnover}</td></tr>
             <tr><th>Location</th><td>${contact.addressShort}</td></tr>
             <tr><th>Google rating</th><td>${contact.rating.score} / 5 from ${contact.rating.count} reviews</td></tr>
@@ -763,7 +990,7 @@ ${pageHead({
     </div>
     <div class="note mt-8" data-reveal>
       ${icons.shield}
-      <div>Company registration details are reproduced from public business listings and Ferrocare's own published profile. Where you need verified documentary proof for procurement, request the certificates directly at the time of enquiry.</div>
+      <div>Company registration details are reproduced from public business listings and Ferrocare's own published profile. Where documentary proof is required for procurement, request the certificates directly at the time of enquiry.</div>
     </div>
   </div>
 </section>
@@ -842,7 +1069,7 @@ ${pageHead({
       </div>
     </div>
     <div class="split__media" data-reveal data-delay="2">
-      ${art.lvdh}
+      ${figure("install-5", "Ferrocare engineers carrying out on-site oil cleaning", "On-site oil cleaning and dehydration", "Pre- and post-service cleanliness readings, documented")}
     </div>
   </div>
 </section>
@@ -964,8 +1191,8 @@ ${pageHead({
 
 <section class="section section--dark">
   <div class="wrap split split--reverse">
-    <div class="split__media" data-reveal data-delay="2" style="background:linear-gradient(155deg,#131c2b,#0d1420);border-color:rgba(255,255,255,.08)">
-      ${art.monitor}
+    <div data-reveal data-delay="2">
+      ${figure("install-2", "Oil filtration unit installed in a steel plant", "Installed, not occasional", "Filtration as part of the process rather than a service visit")}
     </div>
     <div data-reveal>
       <span class="eyebrow">The economics</span>
@@ -1124,9 +1351,24 @@ ${pageHead({
     </div>
 
     <div data-reveal data-delay="2">
-      <form class="form" id="enquiryForm" novalidate>
+      <form class="form" id="enquiryForm" novalidate
+              action="${FORM.endpoint}" method="POST"
+              data-mode="${FORM.mode}"
+              data-recipient="${FORM.recipient}"
+              data-subject="${FORM.subject}">
         <h3 style="font-size:var(--t-h4)">Enquiry form</h3>
         <p class="muted mt-3" style="font-size:var(--t-sm)">Fields marked <span class="accent-text">*</span> are required. The more detail you give about the fluid and the duty, the more precise the recommendation.</p>
+
+        <!-- Relay-service control fields -->
+        <input type="hidden" name="_subject" value="${FORM.subject}">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="page" value="">
+        <!-- Honeypot: bots fill this, people never see it -->
+        <div class="hp" aria-hidden="true">
+          <label for="f-website">Leave this field empty</label>
+          <input id="f-website" type="text" name="_honey" tabindex="-1" autocomplete="off">
+        </div>
 
         <div class="field-row mt-6">
           <div class="field">
@@ -1184,11 +1426,18 @@ ${pageHead({
           <a class="btn btn--ghost btn--lg" href="tel:${contact.phoneHref}">Call instead</a>
         </div>
 
-        <div class="form__success" id="formSuccess" role="status">
-          <strong>Thank you — your enquiry has been prepared.</strong><br>
-          This is a demonstration form, so nothing has been transmitted. In production this would post to Ferrocare's sales desk. To reach them now, call
-          <a href="tel:${contact.phoneHref}" style="text-decoration:underline">${contact.phoneDisplay}</a> or email
-          <a href="mailto:${contact.email}" style="text-decoration:underline">${contact.email}</a>.
+        <div class="form__success" id="formSuccess" role="status" hidden>
+          <strong>Thank you — your enquiry has been sent.</strong><br>
+          It has gone to Ferrocare's sales desk at
+          <a href="mailto:${contact.email}" style="text-decoration:underline">${contact.email}</a>,
+          and we will reply to the address you gave. If it is urgent, call
+          <a href="tel:${contact.phoneHref}" style="text-decoration:underline">${contact.phoneDisplay}</a>.
+        </div>
+
+        <div class="form__error" id="formError" role="alert" hidden>
+          <strong>That did not send.</strong>
+          <span id="formErrorDetail">Please try again, or email us directly.</span>
+          <a class="btn btn--ghost btn--sm mt-4" id="formMailto" href="#">Open in your email app instead</a>
         </div>
 
         <p class="form__note">

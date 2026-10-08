@@ -50,6 +50,25 @@ export const company = {
     primary: "https://www.ferrocare.net/",
     secondary: "https://www.ferrocare.com/",
   },
+  /* ------------------------------------------------------------------------
+     Contact-form delivery.
+
+     The site is static (GitHub Pages), so the form posts to a relay service
+     rather than to a server of our own. FormSubmit is configured by default
+     because it needs no account and no API key — only a one-time activation
+     click on the first email it sends to the address below.
+
+     To switch providers, change `endpoint` and set `mode`:
+       formsubmit : https://formsubmit.co/ajax/<email>          (no signup)
+       formspree  : https://formspree.io/f/<form-id>            (free account)
+       web3forms  : https://api.web3forms.com/submit            (free key)
+     ------------------------------------------------------------------------ */
+  form: {
+    endpoint: "https://formsubmit.co/ajax/info@ferrocare.com",
+    mode: "formsubmit",
+    subject: "Website enquiry — Ferrocare Machines",
+    recipient: "info@ferrocare.com",
+  },
 };
 
 /* Installed base & credentials */
@@ -1326,12 +1345,68 @@ export const differentiators = [
 ];
 
 export const milestones = [
-  { year: "1980", title: "Incorporated in Pune", body: "Ferrocare Machines Private Limited is registered in Maharashtra as a manufacturer of oil purification equipment. The company's own literature also cites 1981 as its inception year for trading operations." },
-  { year: "1981–89", title: "Trading, then manufacturing", body: "The company begins by trading Japanese machines and servicing them, then sets up its own manufacturing under licence from Kleentek of Japan. Sales offices follow in Mumbai, Delhi, Daman and Bangalore." },
-  { year: "1990s", title: "The ELC range scales", body: "Electrostatic liquid cleaners become the core product, growing into a ten-model range. Today over 1,000 units are in service in India and more than 25,000 Kleentek units worldwide." },
-  { year: "2000s", title: "Dehydration and heavy industry", body: "The LVDH range is developed and applied to turbine, gear and hydraulic oils across steel and power plants, followed by EPT Canada phosphate-ester technology for fire-resistant fluids." },
-  { year: "2010s", title: "Instrumentation and imaging", body: "Online particle counters, digital imaging analysers and moisture sensors complete the loop — cleaning and verifying. Moisture sensors are wired to start dehydration automatically." },
-  { year: "Today", title: "IoT-enabled and integrated", body: "The R-series ELC units ship IoT enabled with MODBUS output, and the I-series integrates electrostatic cleaning with vacuum dehydration on a single frame with touchscreen diagnostics." },
+  {
+    year: "1980",
+    era: "The beginning",
+    icon: "file",
+    title: "Incorporated in Pune",
+    body:
+      "Ferrocare Machines Private Limited is registered in Maharashtra as a manufacturer of oil purification equipment. The company's own literature also cites 1981 as its inception year for trading operations — the two dates have sat side by side in its records ever since.",
+    stat: { v: "U29299MH1980", l: "CIN registration" },
+  },
+  {
+    year: "1981–89",
+    era: "Trading, then making",
+    icon: "wrench",
+    title: "Manufacturing under Kleentek licence",
+    body:
+      "The company begins by trading Japanese machines and servicing them, then sets up its own manufacturing under licence from Kleentek of Japan. Sales and service offices follow in Mumbai, Delhi, Daman and Bangalore — the network that still carries the ELC range today.",
+    stat: { v: "Kleentek, Japan", l: "Technology licence" },
+  },
+  {
+    year: "1990s",
+    era: "The core product",
+    icon: "bolt",
+    title: "The ELC range scales up",
+    body:
+      "Electrostatic liquid cleaners become the core of the business and grow into a ten-model range, from the compact ELC 8 LP to the R 600 that maintains 1,20,000 litres of VG 32 oil. The machines go into steel mills, power stations and automotive lines across India.",
+    stat: { v: "1,000+", l: "ELC units in India" },
+    img: "elc-machine",
+    alt: "Ferrocare ELC electrostatic liquid cleaner",
+  },
+  {
+    year: "2000s",
+    era: "Water and heavy industry",
+    icon: "snow",
+    title: "Low vacuum dehydration",
+    body:
+      "The LVDH range is developed and applied to turbine, gear and hydraulic oils where water ingress was writing off thousands of litres of oil. Phosphate-ester technology follows from EPT of Canada, holding acid number below 0.2 mg KOH/g in fire-resistant turbine control circuits.",
+    stat: { v: "10–20 ppm", l: "Final water content" },
+    img: "lvdh-machine",
+    alt: "Ferrocare LVDH low vacuum dehydration machine",
+  },
+  {
+    year: "2010s",
+    era: "Measure, don't guess",
+    icon: "gauge",
+    title: "Instrumentation completes the loop",
+    body:
+      "Online particle counters rated to 400 bar, digital imaging analysers that classify wear-particle shape, and inline moisture sensors that start a dehydrator automatically. Ferrocare stops only cleaning oil and starts proving what the cleaning achieved.",
+    stat: { v: "400 bar", l: "Online counter rating" },
+    img: "opcom-inline",
+    alt: "OPCOM online particle counter reading a live ISO cleanliness code",
+  },
+  {
+    year: "Today",
+    era: "Connected and integrated",
+    icon: "layers",
+    title: "IoT-enabled and integrated",
+    body:
+      "The R-series ELC units ship IoT enabled with MODBUS output, streaming live condition data to a PC or handset. The I-series puts electrostatic cleaning and vacuum dehydration on one frame with a self-diagnostic touchscreen — and the catalogue now runs to eleven families and 62 documented models.",
+    stat: { v: "62", l: "Documented models" },
+    img: "elc-2stage",
+    alt: "Integrated ELC and LVDH system",
+  },
 ];
 
 /* ==========================================================================

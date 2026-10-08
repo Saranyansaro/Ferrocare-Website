@@ -82,6 +82,53 @@ for another host:
 SITE_ORIGIN=https://ferrocare.example node build/build.mjs
 ```
 
+## Contact form delivery
+
+GitHub Pages serves static files, so the enquiry form posts to a **relay
+service** rather than to a server of our own. It is wired to **FormSubmit**
+because that needs no account and no API key.
+
+**One manual step is required before enquiries arrive.** FormSubmit sends a
+one-time confirmation email to the address in the config. Somebody with access
+to that inbox has to click the activation link once; after that, every
+submission is delivered. Until it is clicked, submissions are accepted by the
+service but not forwarded.
+
+The address lives in one place — `build/data.mjs`:
+
+```js
+form: {
+  endpoint: "https://formsubmit.co/ajax/info@ferrocare.com",
+  mode: "formsubmit",
+  subject: "Website enquiry — Ferrocare Machines",
+  recipient: "info@ferrocare.com",
+},
+```
+
+### Switching provider
+
+Change `endpoint` (and `mode`, if you want the note to match):
+
+| Provider | Endpoint | Account needed |
+|---|---|---|
+| FormSubmit | `https://formsubmit.co/ajax/<email>` | none — activation email only |
+| Formspree | `https://formspree.io/f/<form-id>` | free account |
+| Web3Forms | `https://api.web3forms.com/submit` | free access key |
+
+Then rebuild with `node build/build.mjs` and push.
+
+### Behaviour
+
+- Posts as JSON with `Accept: application/json`, so the visitor stays on the page.
+- `_replyto` is set to the enquirer's address, so **Reply** in the inbox goes
+  straight back to them.
+- A hidden honeypot field (`_honey`) catches bots; filled honeypots are accepted
+  silently and dropped.
+- If the relay is unreachable — blocked network, ad-blocker, service down — the
+  form does **not** fail silently. It shows an error and offers a button that
+  opens the visitor's mail app with every field already filled in, so the
+  enquiry is never lost.
+
 ## Deployment
 
 Hosted on **GitHub Pages** from the `main` branch, repository root. Pushing to

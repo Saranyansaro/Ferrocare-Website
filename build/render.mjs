@@ -611,3 +611,113 @@ export const gallery = (items) => `
     </figure>`;
   }).join("")}
 </div>`;
+
+
+/* ------------------------- animated milestone timeline -------------------- */
+/* An infographic timeline: a rail that draws itself as the section scrolls,
+   with year nodes that pop and cards that arrive from their own side. */
+export const timeline = (items) => `
+<div class="tl" id="timeline">
+  <div class="tl__rail" aria-hidden="true"><span class="tl__rail-fill" id="railFill"></span></div>
+  <ol class="tl__list">
+    ${items.map((m, i) => `
+      <li class="tl__item ${i % 2 ? "tl__item--right" : "tl__item--left"}" data-tl>
+        <div class="tl__node" aria-hidden="true">
+          <span class="tl__node-year">${m.year}</span>
+        </div>
+        <article class="tl__card">
+          <div class="tl__head">
+            <span class="tl__ico">${icons[m.icon] || icons.file}</span>
+            <span class="tl__era">${m.era}</span>
+          </div>
+          <h3>${m.title}</h3>
+          <p>${m.body}</p>
+          ${m.img ? `<div class="tl__media"><img src="assets/img/${asset(m.img)}" alt="${m.alt || m.title}" loading="lazy" decoding="async"></div>` : ""}
+          <div class="tl__stat">
+            <strong>${m.stat.v}</strong>
+            <span>${m.stat.l}</span>
+          </div>
+        </article>
+      </li>`).join("")}
+  </ol>
+  <div class="tl__cap" data-tl>
+    <span class="tl__cap-dot"></span>
+    <strong>1980 &rarr; today</strong>
+    <span>Four decades, one problem: oil that degrades before it needs to.</span>
+  </div>
+</div>`;
+
+
+/* --------------------- interactive machine selector ----------------------- */
+export const selector = (fluids, problems, lookup) => `
+<div class="selector" id="selector">
+  <div class="selector__steps">
+    <div class="selector__step">
+      <h3>1 · What fluid are you running?</h3>
+      <div class="selector__opts" data-group="fluid">
+        ${fluids.map((f, i) => `<button class="opt ${i === 0 ? "is-on" : ""}" data-val="${f.key}">${f.label}</button>`).join("")}
+      </div>
+    </div>
+    <div class="selector__step">
+      <h3>2 · What is the contamination?</h3>
+      <div class="selector__opts" data-group="problem">
+        ${problems.map((p, i) => `<button class="opt ${i === 0 ? "is-on" : ""}" data-val="${p.key}">${p.label}</button>`).join("")}
+      </div>
+    </div>
+  </div>
+  <div class="selector__result" id="selectorResult" aria-live="polite"></div>
+</div>
+<script type="application/json" id="selectorData">${JSON.stringify(lookup)}</script>`;
+
+/* ------------------------- ISO cleanliness gauge -------------------------- */
+/* The dial is pure SVG; the reading sits in HTML beneath it so the needle can
+   sweep the full arc without crossing the numbers. */
+export const isoGauge = () => `
+<div class="gauge" id="isoGauge">
+  <svg viewBox="0 0 320 200" role="img" aria-label="ISO 4406 cleanliness scale">
+    <defs>
+      <linearGradient id="gaugeArc" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"   stop-color="#b23c2a"/>
+        <stop offset=".36" stop-color="#d97b34"/>
+        <stop offset=".68" stop-color="#c9b64a"/>
+        <stop offset="1"   stop-color="#1f7d8a"/>
+      </linearGradient>
+    </defs>
+    <path d="M28 168 A 132 132 0 0 1 292 168" fill="none" stroke="#e5ded4" stroke-width="18" stroke-linecap="round"/>
+    <path id="gaugeArcFill" d="M28 168 A 132 132 0 0 1 292 168" fill="none"
+          stroke="url(#gaugeArc)" stroke-width="18" stroke-linecap="round"
+          stroke-dasharray="415" stroke-dashoffset="415"/>
+    <g stroke="#c8d0dc" stroke-width="1.6" stroke-linecap="round">
+      <line x1="28"   y1="168" x2="28"   y2="152"/>
+      <line x1="94"   y1="60"  x2="104"  y2="72"/>
+      <line x1="160" y1="36"  x2="160" y2="52"/>
+      <line x1="226" y1="60"  x2="216"  y2="72"/>
+      <line x1="292" y1="168" x2="292" y2="152"/>
+    </g>
+    <g id="gaugeNeedle" style="transform-origin:160px 168px; transform:rotate(-90deg)">
+      <line x1="160" y1="168" x2="160" y2="54" stroke="#0d1420" stroke-width="3.6" stroke-linecap="round"/>
+      <circle cx="160" cy="168" r="10" fill="#0d1420"/>
+      <circle cx="160" cy="168" r="4" fill="#fdfcfa"/>
+    </g>
+  </svg>
+  <div class="gauge__read">
+    <strong id="gaugeCode">21/19/16</strong>
+    <span id="gaugeCaption">Untreated hydraulic oil</span>
+  </div>
+  <div class="gauge__legend">
+    <span><i style="background:#b23c2a"></i>Out of specification</span>
+    <span><i style="background:#d97b34"></i>Attention</span>
+    <span><i style="background:#1f7d8a"></i>Ferrocare target</span>
+  </div>
+</div>`;
+
+
+/* --------------------------- model ticker --------------------------------- */
+export const ticker = (models) => `
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__track">
+    ${[0, 1].map(() => `<div class="ticker__group" style="display:flex">
+      ${models.map((m) => `<span class="ticker__item ${/^(ELC|LVDH|I-)/.test(m) ? "ticker__item--hi" : ""}">${m}</span>`).join("")}
+    </div>`).join("")}
+  </div>
+</div>`;

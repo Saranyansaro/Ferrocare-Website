@@ -364,6 +364,73 @@
   </div>
 </section>
 
+<!-- ============ what clean oil actually means ============ -->
+<section class="section section--paper">
+  <div class="wrap split">
+    <div data-reveal>
+      <span class="eyebrow">Cleanliness, measured</span>
+      <h2 class="mt-4">What "clean" actually means in numbers</h2>
+      <p class="lead mt-5">
+        Oil cleanliness is reported as an ISO 4406 code — three numbers counting
+        particles above 4, 6 and 14 microns per millilitre. Lower is cleaner. A
+        hydraulic system running servo valves wants to be in the mid-teens; untreated
+        oil sits in the low twenties.
+      </p>
+      <p class="lead mt-5">
+        Mechanical filtration gets you part of the way. Electrostatic collection,
+        which reaches below one micron and also lifts sludge and varnish, is what
+        closes the gap to a code the valves can live with. Watch the needle.
+      </p>
+      <ul class="checks mt-6">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>ISO 4406 reported directly by OPCOM counters — no lab turnaround</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Electrostatic collection to 1 micron and below</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Sludge and varnish removed, which a particle count cannot see</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Cleanliness codes logged over time to show the trend, not a snapshot</span></li>
+      </ul>
+      <div class="btn-row mt-7">
+        <a class="btn btn--primary" href="product-condition-monitoring.html">Condition monitoring range <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+    <div data-reveal data-delay="2">
+      
+<div class="gauge" id="isoGauge">
+  <svg viewBox="0 0 320 200" role="img" aria-label="ISO 4406 cleanliness scale">
+    <defs>
+      <linearGradient id="gaugeArc" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"   stop-color="#b23c2a"/>
+        <stop offset=".36" stop-color="#d97b34"/>
+        <stop offset=".68" stop-color="#c9b64a"/>
+        <stop offset="1"   stop-color="#1f7d8a"/>
+      </linearGradient>
+    </defs>
+    <path d="M28 168 A 132 132 0 0 1 292 168" fill="none" stroke="#e5ded4" stroke-width="18" stroke-linecap="round"/>
+    <path id="gaugeArcFill" d="M28 168 A 132 132 0 0 1 292 168" fill="none"
+          stroke="url(#gaugeArc)" stroke-width="18" stroke-linecap="round"
+          stroke-dasharray="415" stroke-dashoffset="415"/>
+    <g stroke="#c8d0dc" stroke-width="1.6" stroke-linecap="round">
+      <line x1="28"   y1="168" x2="28"   y2="152"/>
+      <line x1="94"   y1="60"  x2="104"  y2="72"/>
+      <line x1="160" y1="36"  x2="160" y2="52"/>
+      <line x1="226" y1="60"  x2="216"  y2="72"/>
+      <line x1="292" y1="168" x2="292" y2="152"/>
+    </g>
+    <g id="gaugeNeedle" style="transform-origin:160px 168px; transform:rotate(-90deg)">
+      <line x1="160" y1="168" x2="160" y2="54" stroke="#0d1420" stroke-width="3.6" stroke-linecap="round"/>
+      <circle cx="160" cy="168" r="10" fill="#0d1420"/>
+      <circle cx="160" cy="168" r="4" fill="#fdfcfa"/>
+    </g>
+  </svg>
+  <div class="gauge__read">
+    <strong id="gaugeCode">21/19/16</strong>
+    <span id="gaugeCaption">Untreated hydraulic oil</span>
+  </div>
+  <div class="gauge__legend">
+    <span><i style="background:#b23c2a"></i>Out of specification</span>
+    <span><i style="background:#d97b34"></i>Attention</span>
+    <span><i style="background:#1f7d8a"></i>Ferrocare target</span>
+  </div>
+</div>
+    </div>
+  </div>
+</section>
+
 <!-- featured: electrostatic -->
 <section class="section">
   <div class="wrap split">
