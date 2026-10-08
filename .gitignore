@@ -1,0 +1,6 @@
+# Local preview harness and screenshots
+.preview/
+# Build-time tooling installed into the workspace
+.tools/
+# OS noise
+.DS_Store
