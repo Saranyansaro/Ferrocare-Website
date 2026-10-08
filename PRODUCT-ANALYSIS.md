@@ -24,7 +24,7 @@ The company was incorporated in 1980 and its founding technology — **electrost
 
 ---
 
-## 2. Product portfolio — nine families, 60+ configurations
+## 2. Product portfolio — eleven families, 62 documented models
 
 ### 2.1 Electrostatic Liquid Cleaners (ELC series) — *the core product*
 **Technology:** Two stainless-steel electrode sets are charged positive and negative by a special transformer. Suspended particles — metallic and non-metallic alike — migrate to the electrode of opposite polarity and are collected on pleated cellulose media, where the deformed field is strongest. No chemical reaction, so the additive package is untouched.
@@ -104,7 +104,8 @@ Installed, plumbed and wired skid-mounted systems for the heavy end of the plant
 ### 2.7 Condition Monitoring Instruments
 | Instrument | Key specification |
 |---|---|
-| **OPCOM** On-Line Particle Counter | Liquid particle counter · **up to 400 bar** · 500 ml/min · industrial & lab |
+| **OPCOM** Online Particle Counter | Liquid particle counter · **up to 400 bar** · 500 ml/min · ISO/NAS/SAE output |
+| **OPCOM** Offline / Portable Counter | Battery hand-set · bottle sampling · PC reporting and trend analysis |
 | Particle Counter with Printer | 0.5 µm channel · 100 LPM · TFT colour · 6.2 kg · 36 VDC · onboard printer |
 | Portable Oil & Fuel Cleanliness Monitor | 0.5 µm · 424 cSt · LED · Ethernet · 5.5 kg · 5 hr charge · 2 min update |
 | Oil Moisture Sensor | 1 a<sub>w</sub> measuring range · 80 °C · SS/plastic |
@@ -122,7 +123,12 @@ Installed, plumbed and wired skid-mounted systems for the heavy end of the plant
 
 ---
 
-### 2.9 Consumables & Tool Steels
+### 2.9 Two-Stage & Three-Stage Mechanical Filtration
+**Technology:** A magnetic pre-strainer pins the ferrous fraction with no consumable at all, then progressively finer cartridge elements take the bulk, the fine silt and finally polish. Staging means no single element blinds off early, so differential pressure stays low and the outlet cleanliness code stays consistent rather than drifting as an element loads.
+
+**Specification:** 75 LPM at 10 bar on the two-stage unit; elements from 1, 3, 5, 10, 25 and 40 µm. The water-glycol machine (75 LPM, 16 bar, two-stage) is built for HFC fluid that standard filtration cannot handle, and the FRF multistage unit covers fire-resistant circuits.
+
+### 2.10 Consumables & Tool Steels
 - **Dust Collector Paper for ELC Machines** — cellulose media, 126 m² filtering area, 3,000 m³/hr airflow, 50+ filters. **This is the razorblade**: every installed ELC machine consumes collector media indefinitely.
 - **Nachi High Speed Steels** — grades M2 / M35 / M42 & ASP, powder-metallurgy route, 5 % Co, 30–35 HRC, from 0.3 mm dia, 2,000 mm length.
 - **High Speed Steel Rod** — M42, 8 mm dia, 62–64 HRC, ground, round/flat, under 3 m.

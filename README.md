@@ -6,16 +6,19 @@ filtration systems, coolant filtration and condition monitoring instruments sinc
 
 ## View it
 
-The site is served locally at:
+**Live site (public):** https://saranyansaro.github.io/Ferrocare-Website/
+**Source:** https://github.com/Saranyansaro/Ferrocare-Website
 
-**http://127.0.0.1:8765/index.html**
-
-Any static file server works. To restart it:
+Also runnable locally — any static file server works:
 
 ```bash
 cd "Ferrocare Website"
 python3 -m http.server 8765 --bind 127.0.0.1
+# then open http://127.0.0.1:8765/index.html
 ```
+
+Every page is a plain `.html` file, so you can also just double-click
+`index.html` — no server or build step required.
 
 ## Pages
 
@@ -29,6 +32,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 | `faq.html` | Ten questions on electrostatic cleaning, dehydration, sizing, additives, oil testing |
 | `contact.html` | Address, phones, hours, registration numbers, enquiry form, location |
 | `product-*.html` | Eleven product family pages, each with a photo gallery, technology section, model tables and published specifications |
+| `site.webmanifest` | PWA manifest — app name, theme colour and icon set |
 | `PRODUCT-ANALYSIS.md` | Full product & services analysis, competitive assessment, catalogue findings |
 | `research/` | Underlying research report on the company |
 
@@ -71,6 +75,22 @@ Rebuild after editing content or templates:
 node build/build.mjs
 ```
 
+Canonical and social URLs default to the GitHub Pages address above. To build
+for another host:
+
+```bash
+SITE_ORIGIN=https://ferrocare.example node build/build.mjs
+```
+
+## Deployment
+
+Hosted on **GitHub Pages** from the `main` branch, repository root. Pushing to
+`main` republishes the site automatically:
+
+```bash
+git add -A && git commit -m "..." && git push
+```
+
 ## Design notes
 
 - **Palette** — warm paper neutrals against graphite ink, with a molten-copper accent for
@@ -89,6 +109,9 @@ node build/build.mjs
   IntersectionObserver misses.
 - **Verified layouts** — audited for horizontal overflow at 500, 620, 768, 900, 1024, 1280
   and 1440 px; zero overflowing elements on every page type.
+- **Favicons** — the real FM mark, cropped to the letterforms and set on a rounded plate so
+  it stays legible at 16 px and on dark browser tabs. Full set: `.ico`, 16/32/48 px PNG,
+  180 px Apple touch icon, 192/512 px manifest icons, plus a 1200×630 social card.
 
 ## Accuracy of specification data
 
